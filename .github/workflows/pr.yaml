@@ -1,0 +1,13 @@
+## GitHub Actions Workflow - CICD
+
+name: Pull Request Workflow
+on:
+  pull_request:
+    branches:
+        - main
+
+jobs:
+  build:
+    uses: ./.github/workflows/template_build.yaml
+    secrets:
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

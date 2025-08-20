@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Background Color</title>
+    <style>
+        body {
+            background-color: {{ bg_color }};
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: {{ font_color }};
+            font-size: 2em;
+        }
+        h1 {
+            color: {{ font_color }};
+        }
+    </style>
+</head>
+<body>
+    <h1>Demo UCA!</h1>
+    <h1>{{ message }}</h1>
+    <div>
+        Background color is set to: <strong>{{ bg_color }}</strong> and font color is set to: <strong>{{ font_color }}</strong>
+    </div>
+</body>
+</html>
