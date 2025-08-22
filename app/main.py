@@ -7,9 +7,9 @@ def create_app():
 
     @app.route('/')
     def home():
-        bg_color = os.getenv('BG_COLOR', 'white')  # Default to white if not set
-        font_color = os.getenv('FONT_COLOR', 'black')  # Default to black if not set
-        message = os.getenv('MESSAGE', 'Hola Mundo Python')  # Default to black if not set
+        bg_color = os.getenv('BG_COLOR', '#034a57')  # Default to #034a57 if not set
+        font_color = os.getenv('FONT_COLOR', '#fafafa')  # Default to #fafafa if not set
+        message = os.getenv('MESSAGE', 'Hola Mundo Python')  # Default to 'Hola Mundo Python' if not set
         return render_template('index.html', bg_color=bg_color, font_color=font_color, message=message)
 
     return app

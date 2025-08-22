@@ -26,7 +26,7 @@ my-python-web-app
 
 2. **Create a virtual environment** (optional but recommended):
    ```
-   python -m venv venv
+   python3 -m venv venv
    source venv/bin/activate
    ```
 
