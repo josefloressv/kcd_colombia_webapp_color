@@ -88,7 +88,7 @@ jobs:
         env:
           CURRENT_ACTIVE_SERVICE_NAME: ${{ env.APP_PREFIX }}-${{ env.ACTIVE_COLOR }}
         run:
-          ./.github/scripts/service_scale_down.sh
+        run: ./.github/scripts/service_scale_down.sh
 
       - name: Update the active color in SSM
         env:
