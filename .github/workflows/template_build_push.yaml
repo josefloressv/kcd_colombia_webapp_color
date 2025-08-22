@@ -17,15 +17,13 @@ env:
     AWS_REGION: us-east-1
 
 
-# Permissions for the token
-permissions:
-  id-token: write
-  contents: read
-
 # Define the jobs in the workflow.
 jobs: 
     # Job for building and pushing the Docker image.
     build_and_push:
+      permissions:
+        id-token: write
+        contents: read
       name: Build and Push to Docker Hub
       runs-on: ubuntu-24.04
       outputs:
