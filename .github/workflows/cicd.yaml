@@ -26,3 +26,11 @@ jobs:
     secrets:
       DOCKER_REGISTRY_URI: ${{ secrets.ECR_URI }}
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+  cutover:
+    uses: ./.github/workflows/template_cutover.yaml
+    with:
+      environment: prod
+      ecs_cluster_name: kcdcolombia-demo-prod
+      image_tag: 9336cad
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
