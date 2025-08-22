@@ -77,7 +77,7 @@ jobs:
 
       - name: Do the cutover
         env:
-          LOAD_BALANCER_NAME: melee-${{ env.ENVIRONMENT }}-lb
+          LOAD_BALANCER_NAME: kcdcolombia-${{ env.ENVIRONMENT }}-lb
           BLUE_TARGET_GROUP_NAME: ${{ env.APP_PREFIX }}-blue
           GREEN_TARGET_GROUP_NAME: ${{ env.APP_PREFIX }}-green
         run:
