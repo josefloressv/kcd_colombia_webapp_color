@@ -10,7 +10,7 @@ set -eo pipefail
 # - SSM_LIVE_SERVICE_MINIMUM_TASKS_PARAMETER_NAME: Name of the SSM parameter for the minimum number of tasks for the live service
 
 # Test
-# ECS_CLUSTER_NAME=melee-windows-dev CURRENT_ACTIVE_SERVICE_NAME=web-dev-blue NEW_ACTIVE_SERVICE_NAME=web-dev-green SSM_LIVE_SERVICE_MINIMUM_TASKS_PARAMETER_NAME=/melee/web/dev/live_service_minimum_tasks ./.github/scripts/service_stabilize.sh
+# ECS_CLUSTER_NAME=kcdcolombia-demo-prod CURRENT_ACTIVE_SERVICE_NAME=webapp-color-prod-blue NEW_ACTIVE_SERVICE_NAME=webapp-color-prod-green SSM_LIVE_SERVICE_MINIMUM_TASKS_PARAMETER_NAME=/kcdcolombia/webapp-color/prod/live_service_minimum_tasks ./.github/scripts/service_stabilize.sh
 
 
 # Get the desired count of the old service

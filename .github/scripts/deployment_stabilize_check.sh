@@ -8,7 +8,7 @@ set -eo pipefail
 # - NEW_ACTIVE_SERVICE_NAME: Name of the inactive service
 
 # Test
-# ECS_CLUSTER_NAME=melee-windows-dev NEW_ACTIVE_SERVICE_NAME=web-dev-green ./.github/scripts/deployment_stabilize_check.sh
+# ECS_CLUSTER_NAME=kcdcolombia-demo-prod NEW_ACTIVE_SERVICE_NAME=webapp-color-prod-green ./.github/scripts/deployment_stabilize_check.sh
 
 # Checking the service stabilized
 echo "Checking the service stabilized for $NEW_ACTIVE_SERVICE_NAME..."

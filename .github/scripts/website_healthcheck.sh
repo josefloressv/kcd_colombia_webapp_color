@@ -3,7 +3,7 @@ set -eo pipefail
 
 # This script checks the health of a website by sending an HTTP request and checking the response code.
 # It takes the URL of the website as an argument.
-# Usage: URL="https://app.dev.melee.gg/Home/Health" ./.github/scripts/website_healthcheck.sh
+# Usage: URL="https://ecs.gitops.club/Home/Health" ./.github/scripts/website_healthcheck.sh
 
 # Arguments:
 #   - URL: The URL of the website to check

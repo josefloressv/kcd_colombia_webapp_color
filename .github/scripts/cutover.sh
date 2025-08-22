@@ -15,7 +15,7 @@ set -eo pipefail
 # - GREEN_TARGET_GROUP_NAME: Name of the green target group
 
 # Usage
-# ACTIVE_COLOR=blue ACTIVE_HOST=app.dev.melee.gg INACTIVE_HOST=app-test.dev.melee.gg LOAD_BALANCER_NAME=melee-dev-lb BLUE_TARGET_GROUP_NAME=web-dev-blue GREEN_TARGET_GROUP_NAME=web-dev-green ./.github/scripts/cutover.sh
+# ACTIVE_COLOR=blue ACTIVE_HOST=ecs.gitops.club INACTIVE_HOST=preview.ecs.gitops.club LOAD_BALANCER_NAME=kcdcolombia-prod BLUE_TARGET_GROUP_NAME=webapp-color-prod-blue GREEN_TARGET_GROUP_NAME=webapp-color-prod-green ./.github/scripts/cutover.sh
 
 # Get the ARN of Load Balancer resources and Target groups
 LOAD_BALANCER_ARN=$(aws elbv2 describe-load-balancers --query "LoadBalancers[?LoadBalancerName=='$LOAD_BALANCER_NAME'].LoadBalancerArn" --output text)
