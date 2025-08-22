@@ -16,6 +16,12 @@ on:
 env:
     AWS_REGION: us-east-1
 
+
+# Permissions for the token
+permissions:
+  id-token: write
+  contents: read
+
 # Define the jobs in the workflow.
 jobs: 
     # Job for building and pushing the Docker image.
