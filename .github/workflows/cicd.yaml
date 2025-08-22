@@ -3,8 +3,8 @@
 name: CI/CD Workflow
 on:
   push:
-    branches:
-      - cicd
+    # branches:
+    #   - cicd
     tags:
       - '[0-9]+.[0-9]+.[0-9]+' # Matches Semver-like tags such as 1.0.0
 
