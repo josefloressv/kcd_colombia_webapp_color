@@ -73,7 +73,7 @@ jobs:
           CURRENT_ACTIVE_SERVICE_NAME: ${{ env.APP_PREFIX }}-${{ env.ACTIVE_COLOR }}
           NEW_ACTIVE_SERVICE_NAME: ${{ env.APP_PREFIX }}-${{ env.INACTIVE_COLOR }}
         run:
-          ./.github/scripts/service_stabilize.sh
+        run: ./.github/scripts/service_stabilize.sh
 
       - name: Do the cutover
         env:
