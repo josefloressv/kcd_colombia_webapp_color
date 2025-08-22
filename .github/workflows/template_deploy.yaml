@@ -92,7 +92,7 @@ jobs:
           wait-for-service-stability: false
 
   # Job for deploying to the inactive ECS service.
-  wait_depployment_stabilize:
+  wait_deployment_stabilize:
     needs: deploy_to_inactive
     name: Wait Deploy Stabilize
     runs-on: ubuntu-latest
