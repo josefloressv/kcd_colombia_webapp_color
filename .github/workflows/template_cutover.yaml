@@ -80,7 +80,7 @@ jobs:
           LOAD_BALANCER_NAME: kcdcolombia-${{ env.ENVIRONMENT }}
           BLUE_TARGET_GROUP_NAME: ${{ env.APP_PREFIX }}-blue
           GREEN_TARGET_GROUP_NAME: ${{ env.APP_PREFIX }}-green
-        run:
+        run: ./.github/scripts/cutover.sh
           ./.github/scripts/cutover.sh
 
 
