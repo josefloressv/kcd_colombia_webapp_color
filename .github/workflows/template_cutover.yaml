@@ -24,6 +24,11 @@ on:
       AWS_ROLE_ARN:
         required: true
 
+# Permissions for the token
+permissions:
+  id-token: write
+  contents: read
+
 # Define environment variables used in the workflow.
 env:
   ENVIRONMENT: ${{ inputs.environment }}

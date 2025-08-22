@@ -15,20 +15,20 @@ jobs:
   #     DOCKER_REGISTRY_URI: ${{ secrets.ECR_URI }}
   #     AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
-  deploy:
-    # needs: build
-    uses: ./.github/workflows/template_deploy.yaml
-    with:
-      environment: prod
-      ecs_cluster_name: kcdcolombia-demo-prod
-      image_tag: 9336cad
-      # image_tag: ${{ needs.build.outputs.image_tag }}
-    secrets:
-      DOCKER_REGISTRY_URI: ${{ secrets.ECR_URI }}
-      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+  # deploy:
+  #   # needs: build
+  #   uses: ./.github/workflows/template_deploy.yaml
+  #   with:
+  #     environment: prod
+  #     ecs_cluster_name: kcdcolombia-demo-prod
+  #     image_tag: 9336cad
+  #     # image_tag: ${{ needs.build.outputs.image_tag }}
+  #   secrets:
+  #     DOCKER_REGISTRY_URI: ${{ secrets.ECR_URI }}
+  #     AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
   cutover:
-    needs: deploy
+    # needs: deploy
     uses: ./.github/workflows/template_cutover.yaml
     with:
       environment: prod
