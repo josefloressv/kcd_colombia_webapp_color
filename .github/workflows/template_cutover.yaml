@@ -95,4 +95,4 @@ jobs:
           NEW_ACTIVE_COLOR: ${{ env.INACTIVE_COLOR }}
           IMAGE_TAG: ${{ inputs.image_tag }}
         run:
-          ./.github/scripts/ssm_update_parameters.sh
+        run: ./.github/scripts/ssm_update_parameters.sh
