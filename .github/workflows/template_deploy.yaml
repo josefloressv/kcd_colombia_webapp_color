@@ -30,6 +30,11 @@ env:
   ECS_CLUSTER_NAME: ${{ inputs.ecs_cluster_name }}
   ASG_NAME: ${{ inputs.ecs_cluster_name }}
 
+# Permissions for the token
+permissions:
+  id-token: write
+  contents: read
+
 # Define the jobs in the workflow.
 jobs: 
   # Job for deploying to the inactive ECS service.
