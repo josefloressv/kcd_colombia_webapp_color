@@ -83,11 +83,6 @@ jobs:
         run:
           ./.github/scripts/cutover.sh
 
-      - name: Get Image Tag
-        env:
-          ECS_SERVICE_NAME: ${{ env.APP_PREFIX }}-${{ env.INACTIVE_COLOR }}
-        run:
-          ./.github/scripts/get_service_image_tag.sh
 
       - name: Scale down the old service
         env:
@@ -98,5 +93,6 @@ jobs:
       - name: Update the active color in SSM
         env:
           NEW_ACTIVE_COLOR: ${{ env.INACTIVE_COLOR }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
         run:
           ./.github/scripts/ssm_update_parameters.sh
