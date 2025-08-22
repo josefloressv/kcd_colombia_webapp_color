@@ -12,4 +12,4 @@ set -eo pipefail
 
 # To deploy and test the new version of the appllication configure minimum capacity to TASK_DESIRED_COUNT
 aws application-autoscaling register-scalable-target --service-namespace ecs --resource-id "service/$ECS_CLUSTER_NAME/$CURRENT_INACTIVE_SERVICE_NAME" --scalable-dimension ecs:service:DesiredCount --min-capacity "$TASK_DESIRED_COUNT" > /dev/null
-echo "Done! Service saled out to the minimum"
+echo "Done! Service scaled out to the minimum"
