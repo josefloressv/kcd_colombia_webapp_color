@@ -3,13 +3,37 @@
 name: CI/CD Workflow
 on:
   push:
+    # branches:
+    #   - cicd
     tags:
       - '[0-9]+.[0-9]+.[0-9]+' # Matches Semver-like tags such as 1.0.0
 
 jobs:
   build:
-    uses: ./.github/workflows/template_build.yaml
+    uses: ./.github/workflows/template_build_push.yaml
     secrets:
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-  
-  # Job for deploying the application to dev
+      DOCKER_REGISTRY_URI: ${{ secrets.ECR_URI }}
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+
+  deploy:
+    needs: build
+    uses: ./.github/workflows/template_deploy.yaml
+    with:
+      environment: prod
+      ecs_cluster_name: kcdcolombia-demo-prod
+      # image_tag: 9336cad
+      image_tag: ${{ needs.build.outputs.image_tag }}
+    secrets:
+      DOCKER_REGISTRY_URI: ${{ secrets.ECR_URI }}
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+
+  cutover:
+    needs: [deploy, build]
+    uses: ./.github/workflows/template_cutover.yaml
+    with:
+      environment: prod
+      ecs_cluster_name: kcdcolombia-demo-prod
+      # image_tag: 9336cad
+      image_tag: ${{ needs.build.outputs.image_tag }}
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}

@@ -1,0 +1,121 @@
+name: x-Deployment Workflow template
+
+# Trigger the workflow when it is called with the specified inputs.
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+        default: 'dev'
+      ecs_cluster_name:
+        required: true
+        type: string
+      image_tag:
+        required: true
+        type: string
+    secrets:
+      DOCKER_REGISTRY_URI:
+        required: true
+      AWS_ROLE_ARN:
+        required: true
+
+# Define environment variables used in the workflow.
+env:
+  ENVIRONMENT: ${{ inputs.environment }}
+  AWS_REGION: us-east-1
+  APP_PREFIX: webapp-color-${{ inputs.environment }}
+  SSM_ACTIVE_COLOR_PARAMETER_NAME: /kcdcolombia/webapp-color/${{ inputs.environment }}/active_color
+  ECS_CLUSTER_NAME: ${{ inputs.ecs_cluster_name }}
+  ASG_NAME: ${{ inputs.ecs_cluster_name }}
+
+# Permissions for the token
+permissions:
+  id-token: write
+  contents: read
+
+# Define the jobs in the workflow.
+jobs: 
+  # Job for deploying to the inactive ECS service.
+  deploy_to_inactive:
+    name: Deploy to inactive service
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4 # https://github.com/aws-actions/configure-aws-credentials
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: WebAppColorDeployment
+          audience: sts.amazonaws.com
+
+      - name: Get live color from SSM
+        run: |
+          ./.github/scripts/set_active_inactive_colors.sh
+
+      - name: Get the latest revision of the task definition
+        id: task-def-download
+        env:
+          ECS_TASK_FAMILY: ${{ env.APP_PREFIX }}
+        run: |
+          ./.github/scripts/get_task_definition.sh
+
+      - name: Render the Amazon ECS task definition
+        id: task-def
+        env:
+          CONTAINER_NAME: ${{ env.APP_PREFIX }}
+          IMAGE: "${{ secrets.DOCKER_REGISTRY_URI }}:${{ inputs.image_tag }}"
+        uses: aws-actions/amazon-ecs-render-task-definition@v1 # https://github.com/aws-actions/amazon-ecs-render-task-definition
+        with:
+          task-definition: ${{ steps.task-def-download.outputs.file }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ env.IMAGE }}
+          environment-variables: "DOCKER_IMAGE_TAG=${{ inputs.image_tag }}"
+
+      - name: Configure the inactive service autoscaling min capacity
+        env:
+          CURRENT_INACTIVE_SERVICE_NAME: ${{ env.APP_PREFIX }}-${{ env.INACTIVE_COLOR }}
+          TASK_DESIRED_COUNT: 1
+        run:
+          ./.github/scripts/service_deployment_autoscaling.sh
+
+      - name: Deploy to the inactive ECS service with updated task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2 # https://github.com/aws-actions/amazon-ecs-deploy-task-definition
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.APP_PREFIX }}-${{ env.INACTIVE_COLOR }}
+          desired-count: 1
+          cluster: ${{ env.ECS_CLUSTER_NAME }}
+          wait-for-service-stability: false
+
+  # Job for deploying to the inactive ECS service.
+  wait_deployment_stabilize:
+    needs: deploy_to_inactive
+    name: Wait Deploy Stabilize
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ inputs.image_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4 # https://github.com/aws-actions/configure-aws-credentials
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: WebAppColorDeployment
+          audience: sts.amazonaws.com
+
+      - name: Get live color from SSM
+        run: |
+          ./.github/scripts/set_active_inactive_colors.sh
+
+      - name: Check Deployment Stabilize
+        env:
+          NEW_ACTIVE_SERVICE_NAME: ${{ env.APP_PREFIX }}-${{ env.INACTIVE_COLOR }}
+        run: |
+          ./.github/scripts/deployment_stabilize_check.sh
