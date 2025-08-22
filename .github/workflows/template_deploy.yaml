@@ -25,8 +25,8 @@ env:
   ENVIRONMENT: ${{ inputs.environment }}
   AWS_REGION: us-east-1
   APP_PREFIX: webapp-color-${{ inputs.environment }}
-  SSM_ACTIVE_COLOR_PARAMETER_NAME: /kcdcolombia/webapp-color-/${{ inputs.environment }}/active_color
-  SSM_DOCKER_TAG_PARAMETER_NAME: /kcdcolombia/webapp-color-/${{ inputs.environment }}/docker_tag
+  SSM_ACTIVE_COLOR_PARAMETER_NAME: /kcdcolombia/webapp-color/${{ inputs.environment }}/active_color
+  SSM_DOCKER_TAG_PARAMETER_NAME: /kcdcolombia/webapp-color/${{ inputs.environment }}/docker_tag
   ECS_CLUSTER_NAME: ${{ inputs.ecs_cluster_name }}
   ASG_NAME: ${{ inputs.ecs_cluster_name }}
 
