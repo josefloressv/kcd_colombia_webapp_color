@@ -19,7 +19,7 @@ env:
 
 # Permissions for the token
 permissions:
-  id-token: none
+  id-token: write
   contents: read
 
 # Define the jobs in the workflow.
@@ -42,6 +42,8 @@ jobs:
           with:
             role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
             aws-region: ${{ env.AWS_REGION }}
+            role-session-name: WebAppColorDeployment
+            audience: sts.amazonaws.com
         - name: Login to Amazon ECR
           id: login-ecr
           uses: aws-actions/amazon-ecr-login@v2 # https://github.com/aws-actions/amazon-ecr-login
