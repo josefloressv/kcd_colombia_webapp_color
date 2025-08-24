@@ -53,15 +53,13 @@ jobs:
           audience: sts.amazonaws.com
 
       - name: Get live color from SSM
-        run: |
-          ./.github/scripts/set_active_inactive_colors.sh
+        run: ./.github/scripts/set_active_inactive_colors.sh
 
       - name: Get the latest revision of the task definition
         id: task-def-download
         env:
           ECS_TASK_FAMILY: ${{ env.APP_PREFIX }}
-        run: |
-          ./.github/scripts/get_task_definition.sh
+        run: ./.github/scripts/get_task_definition.sh
 
       - name: Render the Amazon ECS task definition
         id: task-def
@@ -79,8 +77,7 @@ jobs:
         env:
           CURRENT_INACTIVE_SERVICE_NAME: ${{ env.APP_PREFIX }}-${{ env.INACTIVE_COLOR }}
           TASK_DESIRED_COUNT: 1
-        run:
-          ./.github/scripts/service_deployment_autoscaling.sh
+        run: ./.github/scripts/service_deployment_autoscaling.sh
 
       - name: Deploy to the inactive ECS service with updated task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2 # https://github.com/aws-actions/amazon-ecs-deploy-task-definition
@@ -111,11 +108,9 @@ jobs:
           audience: sts.amazonaws.com
 
       - name: Get live color from SSM
-        run: |
-          ./.github/scripts/set_active_inactive_colors.sh
+        run: ./.github/scripts/set_active_inactive_colors.sh
 
       - name: Check Deployment Stabilize
         env:
           NEW_ACTIVE_SERVICE_NAME: ${{ env.APP_PREFIX }}-${{ env.INACTIVE_COLOR }}
-        run: |
-          ./.github/scripts/deployment_stabilize_check.sh
+        run: ./.github/scripts/deployment_stabilize_check.sh

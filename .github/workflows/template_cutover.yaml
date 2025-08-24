@@ -53,8 +53,7 @@ jobs:
       - name: Quick healthcheck for the new active service
         env:
           URL: https://${{ env.INACTIVE_HOST }}/
-        run: |
-          ./.github/scripts/website_healthcheck.sh
+        run: ./.github/scripts/website_healthcheck.sh
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4 # https://github.com/aws-actions/configure-aws-credentials
@@ -65,14 +64,12 @@ jobs:
           audience: sts.amazonaws.com
 
       - name: Get live color from SSM
-        run: |
-          ./.github/scripts/set_active_inactive_colors.sh
+        run: ./.github/scripts/set_active_inactive_colors.sh
 
       - name: Stabilize the tasks in the new active service
         env:
           CURRENT_ACTIVE_SERVICE_NAME: ${{ env.APP_PREFIX }}-${{ env.ACTIVE_COLOR }}
           NEW_ACTIVE_SERVICE_NAME: ${{ env.APP_PREFIX }}-${{ env.INACTIVE_COLOR }}
-        run:
         run: ./.github/scripts/service_stabilize.sh
 
       - name: Do the cutover
@@ -81,18 +78,14 @@ jobs:
           BLUE_TARGET_GROUP_NAME: ${{ env.APP_PREFIX }}-blue
           GREEN_TARGET_GROUP_NAME: ${{ env.APP_PREFIX }}-green
         run: ./.github/scripts/cutover.sh
-          ./.github/scripts/cutover.sh
-
 
       - name: Scale down the old service
         env:
           CURRENT_ACTIVE_SERVICE_NAME: ${{ env.APP_PREFIX }}-${{ env.ACTIVE_COLOR }}
-        run:
         run: ./.github/scripts/service_scale_down.sh
 
       - name: Update the active color in SSM
         env:
           NEW_ACTIVE_COLOR: ${{ env.INACTIVE_COLOR }}
           IMAGE_TAG: ${{ inputs.image_tag }}
-        run:
         run: ./.github/scripts/ssm_update_parameters.sh
