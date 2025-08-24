@@ -1,0 +1,22 @@
+apiVersion: v2
+name: webapp-color
+description: A Helm chart for Kubernetes
+
+# A chart can be either an 'application' or a 'library' chart.
+#
+# Application charts are a collection of templates that can be packaged into versioned archives
+# to be deployed.
+#
+# Library charts provide useful utilities or functions for the chart developer. They're included as
+# a dependency of application charts to inject those utilities and functions into the rendering
+# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+type: application
+
+version: 0.1.0
+# CHART VERSION (SemVer): bump ONLY when templates, helpers, or default values change (anything that alters rendered manifests).
+# This allows consumers to reason about template changes independently of application runtime version.
+
+appVersion: "1.0"
+# APP VERSION (informational): not used to build the container image here. The image tag MUST be provided explicitly via values (image.tag)
+# or CI overrides. Update appVersion only for notable application releases (e.g. minor/major) you want reflected in 'helm show' output;
+# do NOT bump for every deploy when only the image tag changes in GitOps flows.

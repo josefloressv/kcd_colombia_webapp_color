@@ -1,0 +1,115 @@
+nameOverride: ""
+fullnameOverride: ""
+
+environment: development
+
+replicaCount: 1
+
+image:
+  repository: my-registry/webapp-color
+  tag: ""
+  pullPolicy: IfNotPresent
+
+revisionHistoryLimit: 5
+
+podAnnotations: {}
+podLabels: {}
+
+serviceAccount:
+  create: false   # desactivado por ahora; se puede habilitar cuando se necesite IRSA u otros permisos
+  name: ""
+  annotations: {}
+  labels:
+    tier: frontend
+    type: web
+
+securityContext:
+  enabled: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Single application port exposed by the container. The Service targetPort defaults to this value.
+appPort: 8080
+
+env:
+  # Additional ad-hoc environment variables injected directly (keep minimal; prefer configMap.data)
+  static: {}
+  fromConfigMap: []
+  fromSecret: []
+
+configMap:
+  enabled: true
+  name: webapp-color-configmap
+  # Key-value pairs exposed via a ConfigMap and mounted as env vars (through envFrom).
+  # Customize per app/environment via values override.
+  data:
+    BG_COLOR: "#034a57"
+    FONT_COLOR: "#d2dbe6"
+    MESSAGE: "Hola desde Kubernetes GitOps"
+
+service:
+  type: ClusterIP
+  port: 8080        # Service port (cluster-facing). Can differ from appPort if you want remapping.
+  # targetPort: 8080  # Optional override. If unset, it defaults to appPort.
+  nodePort: 30080 # solo si type=NodePort
+
+ingress:
+  enabled: false
+  className: alb
+  annotations: {}
+  hosts:
+    - host: webapp-color.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  # targetMemoryUtilizationPercentage: 75
+
+probes:
+  liveness:
+    enabled: true
+    path: /
+    initialDelaySeconds: 10
+    periodSeconds: 15
+    timeoutSeconds: 2
+  readiness:
+    enabled: true
+    path: /
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 2
+
+deploymentStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 25%
+    maxUnavailable: 0
+
+networkPolicy:
+  enabled: false
+  allowedNamespaces: []
+
+log:
+  format: text
+  level: info
+
+# Trazabilidad (inyectado desde CI con --set gitCommit=$GITHUB_SHA)
+gitCommit: ""

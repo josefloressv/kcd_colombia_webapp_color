@@ -1,0 +1,13 @@
+{{- if .Values.configMap.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configMap.name | default (include "webapp-color.fullname" .) }}
+  labels:
+    {{- include "webapp-color.labels" . | nindent 4 }}
+data:
+  PORT: "{{ .Values.appPort }}"
+  {{- range $k, $v := .Values.configMap.data }}
+  {{ $k }}: {{ $v | quote }}
+  {{- end }}
+{{- end }}
