@@ -1,0 +1,25 @@
+image:
+  repository: 562802099288.dkr.ecr.us-east-1.amazonaws.com/webapp-color-prod
+  tag: 1.0.0
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-1:562802099288:certificate/8639b812-5a50-4b86-9a77-8a7c1f7888cc"
+    # Opcional: timeouts, health-checks, grupo común si tendrás varios paths/apps:
+    # alb.ingress.kubernetes.io/healthcheck-path: /
+    # alb.ingress.kubernetes.io/group.name: web-public
+  hosts:
+    - host: eks.gitops.club
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []  # Con ALB, TLS se determina por el annotation del cert; esta sección es opcional/no requerida
