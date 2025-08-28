@@ -3,47 +3,47 @@
 name: CI/CD Workflow
 on:
   push:
-    branches:
-      - feat/gitops_workflow
+    # branches:
+    #   - cicd
     tags:
       - '[0-9]+.[0-9]+.[0-9]+' # Matches Semver-like tags such as 1.0.0
 
 jobs:
-  # build:
-  #   uses: ./.github/workflows/template_build_push.yaml
-  #   secrets:
-  #     DOCKER_REGISTRY_URI: ${{ secrets.ECR_URI }}
-  #     AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+  build:
+    uses: ./.github/workflows/template_build_push.yaml
+    secrets:
+      DOCKER_REGISTRY_URI: ${{ secrets.ECR_URI }}
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
-  # deploy_to_ecs:
-  #   needs: build
-  #   uses: ./.github/workflows/template_deploy.yaml
-  #   with:
-  #     environment: prod
-  #     ecs_cluster_name: kcdcolombia-demo-prod
-  #     # image_tag: 9336cad
-  #     image_tag: ${{ needs.build.outputs.image_tag }}
-  #   secrets:
-  #     DOCKER_REGISTRY_URI: ${{ secrets.ECR_URI }}
-  #     AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+  deploy_to_ecs:
+    needs: build
+    uses: ./.github/workflows/template_deploy.yaml
+    with:
+      environment: prod
+      ecs_cluster_name: kcdcolombia-demo-prod
+      # image_tag: 9336cad
+      image_tag: ${{ needs.build.outputs.image_tag }}
+    secrets:
+      DOCKER_REGISTRY_URI: ${{ secrets.ECR_URI }}
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
-  # cutover:
-  #   needs: [deploy_to_ecs, build]
-  #   uses: ./.github/workflows/template_cutover.yaml
-  #   with:
-  #     environment: prod
-  #     ecs_cluster_name: kcdcolombia-demo-prod
-  #     # image_tag: 9336cad
-  #     image_tag: ${{ needs.build.outputs.image_tag }}
-  #   secrets:
-  #     AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+  cutover:
+    needs: [deploy_to_ecs, build]
+    uses: ./.github/workflows/template_cutover.yaml
+    with:
+      environment: prod
+      ecs_cluster_name: kcdcolombia-demo-prod
+      # image_tag: 9336cad
+      image_tag: ${{ needs.build.outputs.image_tag }}
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
   deploy_to_eks:
-    # needs: build
+    needs: build
     uses: ./.github/workflows/template_gitops.yaml
     with:
       environment: prod
-      image_tag: f59a990 #${{ needs.build.outputs.image_tag }}
+      image_tag: ${{ needs.build.outputs.image_tag }}
       values_file_path: clusters/prod/apps/webapp-color.values.yaml
       app_name: webapp-color
       env_repo: josefloressv/kcd_colombia_env
