@@ -39,15 +39,11 @@ jobs:
     steps:
       - name: Checkout environment repo
         env:
-          GH_TOKEN: ${{ secrets.ENV_REPO_PAT || github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          # Clone with anonymous URL first (avoids leaking token in logs)
-          git clone "https://github.com/${ENV_REPO}.git" env-repo
-          cd env-repo
-          # Inject token for push (token will be redacted in logs)
-          git remote set-url origin "https://${GH_TOKEN}@github.com/${ENV_REPO}.git"
-          cd - >/dev/null
+          # Clone directly with token (x-access-token format recommended)
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/${ENV_REPO}.git" env-repo
       - name: Update values file
         id: update
         run: |
@@ -67,22 +63,22 @@ jobs:
           fi
           git add "$VALUES_FILE_PATH"
           git -c user.name=github-actions -c user.email=github-actions@github.com commit -m "chore(${APP_NAME}): bump image tag to ${IMAGE_TAG}"
-          git push origin "$BRANCH"
           echo "changed=yes" >> $GITHUB_OUTPUT
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
       - name: Create PR
         if: steps.update.outputs.changed == 'yes'
-        env:
-          GH_TOKEN: ${{ secrets.ENV_REPO_PAT || github.token }}
-        run: |
-          set -euo pipefail
-          cd env-repo
-          gh pr create \
-            --repo "$ENV_REPO" \
-            --head "${{ steps.update.outputs.branch }}" \
-            --base main \
-            --title "chore(${APP_NAME}): promote ${IMAGE_TAG}" \
-            --body "Automated promotion for ${APP_NAME} to image tag ${IMAGE_TAG}. Merge to let ArgoCD sync."
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ github.token }}
+          path: env-repo
+          commit-message: "chore(${ { inputs.app_name } }): bump image tag to ${{ inputs.image_tag }}"
+          branch: ${{ steps.update.outputs.branch }}
+          base: main
+          title: "chore(${ { inputs.app_name } }): promote ${{ inputs.image_tag }}"
+          body: |
+            Automated promotion for ${{ inputs.app_name }}.
+            New image tag: `${{ inputs.image_tag }}`
+            Merge to let ArgoCD sync.
       - name: Summary
         run: |
           echo "Image tag: ${IMAGE_TAG}" >> $GITHUB_STEP_SUMMARY
