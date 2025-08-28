@@ -117,3 +117,8 @@ docker push josefloressv/webapp-color
 
 - A small CLI entrypoint `run.py` was added to make running the app from the command line straightforward.
 - Basic tests were added under `tests/` to cover the default rendering and environment-backed rendering.
+
+Change:
+```html
+<img src="{{ url_for('static', filename='kcdcolombia-logo.png') }}" alt="KCD Colombia Logo">   
+```
