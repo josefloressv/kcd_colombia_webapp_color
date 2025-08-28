@@ -42,7 +42,12 @@ jobs:
           GH_TOKEN: ${{ secrets.ENV_REPO_PAT || github.token }}
         run: |
           set -euo pipefail
+          # Clone with anonymous URL first (avoids leaking token in logs)
           git clone "https://github.com/${ENV_REPO}.git" env-repo
+          cd env-repo
+          # Inject token for push (token will be redacted in logs)
+          git remote set-url origin "https://${GH_TOKEN}@github.com/${ENV_REPO}.git"
+          cd - >/dev/null
       - name: Update values file
         id: update
         run: |
