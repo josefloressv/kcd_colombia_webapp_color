@@ -46,6 +46,7 @@ jobs:
   cutover:
     name: Cutover-${{ inputs.environment }}
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}-approval
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
