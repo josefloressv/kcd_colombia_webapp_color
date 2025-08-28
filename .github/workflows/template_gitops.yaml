@@ -51,19 +51,13 @@ jobs:
           GH_TOKEN: ${{ secrets.ENV_REPO_PAT }}
         run: |
           set -euo pipefail
-          # Quick dry-run style check (list remote refs)
+          # Quick remote reachability
           git ls-remote --heads origin >/dev/null || { echo "::error::Cannot access remote heads"; exit 1; }
-          # Create a tmp ref to verify push (won't persist because we delete it)
-          BRANCH="_permcheck-$(date +%s)"
-          git switch --orphan "$BRANCH" >/dev/null 2>&1 || git checkout -b "$BRANCH"
-          echo test > .permcheck
-          git add .permcheck
-          git -c user.name=github-actions -c user.email=github-actions@github.com commit -m permcheck >/dev/null
-          if git push origin "$BRANCH"; then
-            git push origin :"$BRANCH" # delete remote test branch
-            git checkout -
+          # Dry-run push to verify permission without creating a persistent branch
+          if git push --dry-run origin HEAD:refs/heads/_permcheck_test 2>/dev/null; then
+            echo "Push permission OK"
           else
-            echo "::error::Push failed. Ensure PAT has 'Contents: Read & Write' for ${ENV_REPO}."; exit 1
+            echo "::error::Push failed (dry-run). Ensure PAT has 'Contents: Read & Write' for ${ENV_REPO}."; exit 1
           fi
       - name: Update values file
         id: update
