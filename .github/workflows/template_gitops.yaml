@@ -1,0 +1,86 @@
+name: Template GitOps PR
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      image_tag:
+        required: true
+        type: string
+      values_file_path:
+        required: true
+        type: string
+      app_name:
+        required: true
+        type: string
+      env_repo:
+        required: true
+        type: string
+    secrets:
+      ENV_REPO_PAT:
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  gitops_pr:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+      APP_NAME: ${{ inputs.app_name }}
+      ENV_REPO: ${{ inputs.env_repo }}
+      VALUES_FILE_PATH: ${{ inputs.values_file_path }}
+      IMAGE_TAG: ${{ inputs.image_tag }}
+    steps:
+      - name: Checkout environment repo
+        env:
+          GH_TOKEN: ${{ secrets.ENV_REPO_PAT || github.token }}
+        run: |
+          set -euo pipefail
+          git clone "https://github.com/${ENV_REPO}.git" env-repo
+      - name: Update values file
+        id: update
+        run: |
+          set -euo pipefail
+          cd env-repo
+          BRANCH="gitops/${APP_NAME}-${IMAGE_TAG}"
+          git checkout -b "$BRANCH"
+          if [[ ! -f "$VALUES_FILE_PATH" ]]; then
+            echo "Values file $VALUES_FILE_PATH not found" >&2
+            exit 1
+          fi
+          sed -i.bak -E "s|^(\\s*tag:\\s*).*|\\1${IMAGE_TAG}|" "$VALUES_FILE_PATH"
+          rm -f "$VALUES_FILE_PATH.bak"
+          if git diff --quiet; then
+            echo "changed=no" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          git add "$VALUES_FILE_PATH"
+          git -c user.name=github-actions -c user.email=github-actions@github.com commit -m "chore(${APP_NAME}): bump image tag to ${IMAGE_TAG}"
+          git push origin "$BRANCH"
+          echo "changed=yes" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+      - name: Create PR
+        if: steps.update.outputs.changed == 'yes'
+        env:
+          GH_TOKEN: ${{ secrets.ENV_REPO_PAT || github.token }}
+        run: |
+          set -euo pipefail
+          cd env-repo
+          gh pr create \
+            --repo "$ENV_REPO" \
+            --head "${{ steps.update.outputs.branch }}" \
+            --base main \
+            --title "chore(${APP_NAME}): promote ${IMAGE_TAG}" \
+            --body "Automated promotion for ${APP_NAME} to image tag ${IMAGE_TAG}. Merge to let ArgoCD sync."
+      - name: Summary
+        run: |
+          echo "Image tag: ${IMAGE_TAG}" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ steps.update.outputs.changed }}" != "yes" ]]; then
+            echo "No changes (image tag already current)." >> $GITHUB_STEP_SUMMARY
+          fi
