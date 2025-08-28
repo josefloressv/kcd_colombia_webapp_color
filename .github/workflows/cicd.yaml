@@ -15,7 +15,7 @@ jobs:
       DOCKER_REGISTRY_URI: ${{ secrets.ECR_URI }}
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
-  deploy:
+  deploy_to_ecs:
     needs: build
     uses: ./.github/workflows/template_deploy.yaml
     with:
@@ -28,7 +28,7 @@ jobs:
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
 
   cutover:
-    needs: [deploy, build]
+    needs: [deploy_to_ecs, build]
     uses: ./.github/workflows/template_cutover.yaml
     with:
       environment: prod
@@ -37,3 +37,15 @@ jobs:
       image_tag: ${{ needs.build.outputs.image_tag }}
     secrets:
       AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+
+  deploy_to_eks:
+    needs: build
+    uses: ./.github/workflows/template_gitops.yaml
+    with:
+      environment: prod
+      image_tag: ${{ needs.build.outputs.image_tag }}
+      values_file_path: clusters/prod/apps/webapp-color.values.yaml
+      app_name: webapp-color
+      env_repo: josefloressv/kcd_colombia_env
+    secrets:
+      ENV_REPO_PAT: ${{ secrets.ENV_REPO_PAT }}
