@@ -20,7 +20,8 @@ on:
         type: string
     secrets:
       ENV_REPO_PAT:
-        required: false
+        description: "PAT con permisos 'contents:write' para el repo de entorno"
+        required: true
 
 permissions:
   contents: write
@@ -39,11 +40,31 @@ jobs:
     steps:
       - name: Checkout environment repo
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.ENV_REPO_PAT }}
         run: |
           set -euo pipefail
           # Clone directly with token (x-access-token format recommended)
           git clone "https://x-access-token:${GH_TOKEN}@github.com/${ENV_REPO}.git" env-repo
+      - name: Validate push permissions
+        working-directory: env-repo
+        env:
+          GH_TOKEN: ${{ secrets.ENV_REPO_PAT }}
+        run: |
+          set -euo pipefail
+          # Quick dry-run style check (list remote refs)
+          git ls-remote --heads origin >/dev/null || { echo "::error::Cannot access remote heads"; exit 1; }
+          # Create a tmp ref to verify push (won't persist because we delete it)
+          BRANCH="_permcheck-$(date +%s)"
+          git switch --orphan "$BRANCH" >/dev/null 2>&1 || git checkout -b "$BRANCH"
+          echo test > .permcheck
+          git add .permcheck
+          git -c user.name=github-actions -c user.email=github-actions@github.com commit -m permcheck >/dev/null
+          if git push origin "$BRANCH"; then
+            git push origin :"$BRANCH" # delete remote test branch
+            git checkout -
+          else
+            echo "::error::Push failed. Ensure PAT has 'Contents: Read & Write' for ${ENV_REPO}."; exit 1
+          fi
       - name: Update values file
         id: update
         run: |
@@ -68,7 +89,7 @@ jobs:
         if: steps.update.outputs.changed == 'yes'
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ github.token }}
+          token: ${{ secrets.ENV_REPO_PAT }}
           path: env-repo
           commit-message: "chore(${{ inputs.app_name }}): bump image tag to ${{ inputs.image_tag }}"
           branch: ${{ steps.update.outputs.branch }}
@@ -78,6 +99,7 @@ jobs:
             Automated promotion for ${{ inputs.app_name }}.
             New image tag: `${{ inputs.image_tag }}`
             Merge to let ArgoCD sync.
+          delete-branch: true
       - name: Summary
         run: |
           echo "Image tag: ${IMAGE_TAG}" >> $GITHUB_STEP_SUMMARY
